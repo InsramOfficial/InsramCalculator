@@ -6,27 +6,24 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    TextView resultTv,solutionTv;
-    MaterialButton buttonC,buttonBrackOpen,buttonBrackClose;
-    MaterialButton buttonDivide,buttonMultiply,buttonPlus,buttonMinus,buttonEquals;
-    MaterialButton button0,button1,button2,button3,button4,button5,button6,button7,button8,button9;
-    MaterialButton buttonAC,buttonDot;
+    TextView resultTv, solutionTv;
+    MaterialButton buttonC, buttonBrackOpen, buttonBrackClose;
+    MaterialButton buttonDivide, buttonMultiply, buttonPlus, buttonMinus, buttonEquals;
+    MaterialButton button0, button1, button2, button3, button4, button5, button6, button7, button8, button9;
+    MaterialButton buttonAC, buttonDot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        resultTv=findViewById(R.id.result_tv);
-        solutionTv=findViewById(R.id.solution_tv);
+        resultTv = findViewById(R.id.result_tv);
+        solutionTv = findViewById(R.id.solution_tv);
 
         assignId(buttonC, R.id.button_c);
         assignId(buttonBrackOpen, R.id.button_open_bracket);
@@ -47,42 +44,90 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         assignId(button8, R.id.button_8);
         assignId(button9, R.id.button_9);
         assignId(buttonDot, R.id.button_dot);
-
-
     }
-void assignId(MaterialButton btn,int id)
-{
-    btn=findViewById(id);
-    btn.setOnClickListener(this);
 
-}
+    void assignId(MaterialButton btn, int id) {
+        btn = findViewById(id);
+        btn.setOnClickListener(this);
+    }
+
     @Override
     public void onClick(View view) {
-    MaterialButton button=(MaterialButton) view;
-    String buttonText=button.getText().toString();
-    String dataToCalculate =solutionTv.getText().toString();
+        MaterialButton button = (MaterialButton) view;
+        String buttonText = button.getText().toString();
+        String dataToCalculate = solutionTv.getText().toString();
 
-        if(buttonText.equals("AC")){
-        solutionTv.setText("");
-        resultTv.setText("0");
-        return;
+        if(dataToCalculate.equals("0"))
+        {
+            dataToCalculate = "";
+        }
+
+        if (buttonText.equals("=")) {
+            String result = getResult(dataToCalculate);
+            resultTv.setText(result);
+            return;
+        }
+        if (buttonText.equals("C")) {
+            if (!dataToCalculate.isEmpty()) {
+                dataToCalculate = dataToCalculate.substring(0, dataToCalculate.length() - 1);
+            }
+        } else {
+            dataToCalculate = dataToCalculate + buttonText;
+        }
+
+        solutionTv.setText(dataToCalculate);
     }
 
-    if(buttonText.equals("="))
-    {
-        solutionTv.setText(resultTv.getText());
-        return;
-    }
-    if(buttonText.equals("C")){
-        dataToCalculate=dataToCalculate.substring(0,dataToCalculate.length()-1);
-    }
-    else{
-        dataToCalculate=dataToCalculate+buttonText;
+    // Function to perform the calculation
+    String getResult(String data) {
+        try {
+            double result = evaluateExpression(data);
+            return String.valueOf(result);
+        } catch (Exception e) {
+            return "Error";
+        }
     }
 
-   solutionTv.setText(dataToCalculate);
-    }
-    String getResult(String data){
-        return "Calculated";
+    // Simple evaluation of the expression (no library used)
+    double evaluateExpression(String expression) {
+        // Split by operators and calculate the result
+        char[] arr = expression.toCharArray();
+
+        StringBuilder operand1 = new StringBuilder();
+        StringBuilder operand2 = new StringBuilder();
+        char operator = ' ';
+        boolean foundOperator = false;
+
+        for (char c : arr) {
+            if (c >= '0' && c <= '9' || c == '.') {
+                if (!foundOperator) {
+                    operand1.append(c);
+                } else {
+                    operand2.append(c);
+                }
+            } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+                operator = c;
+                foundOperator = true;
+            }
+        }
+
+        double num1 = Double.parseDouble(operand1.toString());
+        double num2 = Double.parseDouble(operand2.toString());
+
+        switch (operator) {
+            case '+':
+                return num1 + num2;
+            case '-':
+                return num1 - num2;
+            case '*':
+                return num1 * num2;
+            case '/':
+                if (num2 == 0) {
+                    throw new ArithmeticException("Divide by Zero");
+                }
+                return num1 / num2;
+            default:
+                throw new IllegalArgumentException("Invalid operator");
+        }
     }
 }
